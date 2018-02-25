@@ -1,0 +1,44 @@
+version: '2'
+services:
+  kafka:
+    image: antlypls/kafka-legacy
+    container_name: kafka
+    environment:
+     - KAFKA=localhost:9092
+     - ZOOKEEPER=localhost:2181
+    expose:
+     - "2181"
+     - "9092"
+  spark:
+    image: antlypls/spark:1.5.1
+    container_name: spark
+    command: bash
+    volumes:
+     - ./target/scala-2.11.1:/app
+    links:
+     - kafka
+  postgresdb:
+    image: postgres:9.5
+    container_name: postgresdb
+    ports:
+     - "5234:5234"
+    environment:
+     - POSTGRES_USER=odenktools
+     - POSTGRES_PASSWORD=password
+     - POSTGRES_DB=minimal_play_java
+  minimal-play-java:
+    image: odenktools/docker-play-base:v1
+    container_name: minimal-play-java
+    depends_on:
+     - postgresdb
+     - kafka
+     - spark
+    ports:
+     - "9000:9000"
+    volumes:
+     - .:/opt/minimal-play-java
+     - ./.ivy2:/root/.ivy2
+     - ./.sbt:/root/.sbt
+    environment:
+     - PLAY_PORT=9000
+     - PROJECT_HOME=/opt/minimal-play-java
