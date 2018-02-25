@@ -1,17 +1,20 @@
 FROM odenktools/docker-play-base:v1
 
-ENV PROJECT_HOME /opt
-ENV PLAY_PORT 9000
-ENV PORT 9000
-ENV MICROSERVICE_NAME minimal-play-java
+# caching dependencies
 
-RUN mkdir -p ${PROJECT_HOME}/${MICROSERVICE_NAME}
-RUN mkdir -p ${PROJECT_HOME}/${MICROSERVICE_NAME}/out
-COPY . ${PROJECT_HOME}/${MICROSERVICE_NAME}
-WORKDIR ${PROJECT_HOME}/${MICROSERVICE_NAME}
+COPY ["build.sbt", "/tmp/build/"]
 
-RUN activator clean stage
+COPY ["project/plugins.sbt", "project/build.properties", "/tmp/build/project/"]
 
-CMD target/universal/stage/bin/${MICROSERVICE_NAME} -Dhttp.port=${PORT} -DapplyEvolutions.default=true
+RUN cd /tmp/build && \
+  sbt compile && \
+  sbt test:compile && \
+  rm -rf /tmp/build
 
-EXPOSE ${PLAY_PORT}
+# copy code
+COPY . /root/app/
+WORKDIR /root/app
+RUN sbt compile && sbt test:compile
+
+EXPOSE 9000
+CMD ["sbt"]
