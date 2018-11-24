@@ -1,5 +1,4 @@
 import akka.actor.Cancellable;
-import models.filter.UniversalResponse;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;

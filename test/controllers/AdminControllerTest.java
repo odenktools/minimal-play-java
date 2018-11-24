@@ -11,7 +11,7 @@ import static play.test.Helpers.fakeRequest;
 import play.test.WithApplication;
 
 public class AdminControllerTest extends WithApplication {
- 
+
     @Test
     public void createIndex() {
         running(fakeApplication(), () -> {
